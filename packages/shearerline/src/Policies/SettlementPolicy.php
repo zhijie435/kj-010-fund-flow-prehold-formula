@@ -3,6 +3,7 @@
 namespace Shearerline\Policies;
 
 use Shearerline\Models\Settlement;
+use Shearerline\StateMachines\SettlementStateMachine;
 use App\Models\User;
 
 class SettlementPolicy
@@ -19,31 +20,56 @@ class SettlementPolicy
 
     public function create(?User $user): bool
     {
-        return true;
+        return $user !== null;
     }
 
     public function update(?User $user, Settlement $settlement): bool
     {
-        return $settlement->isEditable();
+        if ($user === null) {
+            return false;
+        }
+
+        $stateMachine = new SettlementStateMachine($settlement);
+        return $stateMachine->isEditable();
     }
 
     public function delete(?User $user, Settlement $settlement): bool
     {
-        return $settlement->isEditable();
+        if ($user === null) {
+            return false;
+        }
+
+        $stateMachine = new SettlementStateMachine($settlement);
+        return $stateMachine->isEditable();
     }
 
     public function confirm(?User $user, Settlement $settlement): bool
     {
-        return $settlement->canConfirm();
+        if ($user === null) {
+            return false;
+        }
+
+        $stateMachine = new SettlementStateMachine($settlement);
+        return $stateMachine->canConfirm();
     }
 
     public function settle(?User $user, Settlement $settlement): bool
     {
-        return $settlement->canSettle();
+        if ($user === null) {
+            return false;
+        }
+
+        $stateMachine = new SettlementStateMachine($settlement);
+        return $stateMachine->canSettle();
     }
 
     public function cancel(?User $user, Settlement $settlement): bool
     {
-        return $settlement->canCancel();
+        if ($user === null) {
+            return false;
+        }
+
+        $stateMachine = new SettlementStateMachine($settlement);
+        return $stateMachine->canCancel();
     }
 }

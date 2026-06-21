@@ -158,10 +158,7 @@ class Shearerline implements ShearerlineInterface
 
     public function getSettlement(int $id)
     {
-        $settlement = Settlement::with(['items'])->findOrFail($id);
-        $settlement->recalculateTotals();
-        $settlement->save();
-        return $settlement->fresh('items');
+        return Settlement::with(['items'])->findOrFail($id);
     }
 
     public function createSettlement(array $data)

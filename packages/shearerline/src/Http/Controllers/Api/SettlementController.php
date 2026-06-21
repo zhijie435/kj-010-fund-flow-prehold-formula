@@ -9,7 +9,6 @@ use Shearerline\Http\Requests\CalculateSettlementRequest;
 use Shearerline\Models\Settlement;
 use Shearerline\Shearerline;
 use Illuminate\Http\Request;
-use Shearerline\Exceptions\SettlementStateException;
 
 class SettlementController extends Controller
 {
@@ -60,42 +59,30 @@ class SettlementController extends Controller
 
     public function update(UpdateSettlementRequest $request, Settlement $settlement)
     {
-        try {
-            $settlement = $this->shearerline->updateSettlement($settlement->id, $request->validated());
-            return $this->success($settlement, '结算单更新成功');
-        } catch (SettlementStateException $e) {
-            return $this->error($e->getMessage(), 422);
-        }
+        $settlement = $this->shearerline->updateSettlement($settlement->id, $request->validated());
+
+        return $this->success($settlement, '结算单更新成功');
     }
 
     public function confirm(Settlement $settlement)
     {
-        try {
-            $settlement = $this->shearerline->confirmSettlement($settlement->id);
-            return $this->success($settlement, '结算单确认成功');
-        } catch (SettlementStateException $e) {
-            return $this->error($e->getMessage(), 422);
-        }
+        $settlement = $this->shearerline->confirmSettlement($settlement->id);
+
+        return $this->success($settlement, '结算单确认成功');
     }
 
     public function settle(Settlement $settlement)
     {
-        try {
-            $settlement = $this->shearerline->settleSettlement($settlement->id);
-            return $this->success($settlement, '结算单结算成功');
-        } catch (SettlementStateException $e) {
-            return $this->error($e->getMessage(), 422);
-        }
+        $settlement = $this->shearerline->settleSettlement($settlement->id);
+
+        return $this->success($settlement, '结算单结算成功');
     }
 
     public function cancel(Settlement $settlement)
     {
-        try {
-            $settlement = $this->shearerline->cancelSettlement($settlement->id);
-            return $this->success($settlement, '结算单已取消');
-        } catch (SettlementStateException $e) {
-            return $this->error($e->getMessage(), 422);
-        }
+        $settlement = $this->shearerline->cancelSettlement($settlement->id);
+
+        return $this->success($settlement, '结算单已取消');
     }
 
     public function types()
@@ -108,9 +95,9 @@ class SettlementController extends Controller
 
     public function destroy(Settlement $settlement)
     {
-        if (!$settlement->isEditable()) {
-            return $this->error('当前状态不可删除', 422);
-        }
+        $settlement = $this->shearerline->getSettlement($settlement->id);
+
+        abort_if(!$settlement->isEditable(), 422, '当前状态不可删除');
 
         $settlement->items()->delete();
         $settlement->delete();
