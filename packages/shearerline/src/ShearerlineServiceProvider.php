@@ -52,7 +52,7 @@ class ShearerlineServiceProvider extends ServiceProvider
             }
 
             $this->publishes([
-                __DIR__ . '/database/seeds' => database_path('seeders'),
+                __DIR__ . '/database/seeders' => database_path('seeders'),
             ], 'shearerline-seeds');
 
             $this->publishes([
@@ -96,6 +96,7 @@ class ShearerlineServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 \Shearerline\Console\Commands\InstallCommand::class,
+                \Shearerline\Console\Commands\VerifyCommand::class,
             ]);
         }
     }

@@ -51,9 +51,19 @@ class Settlement extends Model
 
     protected $appends = [
         'product_cost_breakdown',
-        'fund_flow',
-        'withhold_formula',
     ];
+
+    protected static function booted(): void
+    {
+        static::retrieved(function ($model) {
+            if (config('shearerline.append.fund_flow', true)) {
+                $model->append('fund_flow');
+            }
+            if (config('shearerline.append.withhold_formula', true)) {
+                $model->append('withhold_formula');
+            }
+        });
+    }
 
     protected function casts(): array
     {

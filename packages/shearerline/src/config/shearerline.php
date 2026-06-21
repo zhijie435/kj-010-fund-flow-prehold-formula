@@ -2,21 +2,33 @@
 
 return [
     'pagination' => [
-        'per_page' => 15,
+        'per_page' => env('SHEARERLINE_PER_PAGE', 15),
     ],
 
-    'api_route_prefix' => 'api/shearerline',
+    'api_route_prefix' => env('SHEARERLINE_API_PREFIX', 'api/shearerline'),
 
     'api_middleware' => ['api'],
 
     'views' => [
-        'enabled' => true,
+        'enabled' => env('SHEARERLINE_VIEWS_ENABLED', true),
+    ],
+
+    'queue' => [
+        'connection' => env('SHEARERLINE_QUEUE_CONNECTION', env('QUEUE_CONNECTION', 'database')),
+        'settlement_queue' => env('SHEARERLINE_SETTLEMENT_QUEUE', 'shearerline-settlements'),
+        'report_queue' => env('SHEARERLINE_REPORT_QUEUE', 'shearerline-reports'),
+        'settlement_async' => env('SHEARERLINE_SETTLEMENT_ASYNC', false),
+    ],
+
+    'append' => [
+        'fund_flow' => env('SHEARERLINE_APPEND_FUND_FLOW', true),
+        'withhold_formula' => env('SHEARERLINE_APPEND_WITHHOLD_FORMULA', true),
     ],
 
     'settlement' => [
-        'default_supplier_ratio' => 0.50,
-        'default_distributor_ratio' => 0.20,
-        'default_platform_ratio' => 0.30,
+        'default_supplier_ratio' => env('SHEARERLINE_DEFAULT_SUPPLIER_RATIO', 0.50),
+        'default_distributor_ratio' => env('SHEARERLINE_DEFAULT_DISTRIBUTOR_RATIO', 0.20),
+        'default_platform_ratio' => env('SHEARERLINE_DEFAULT_PLATFORM_RATIO', 0.30),
 
         'grade_discounts' => [
             'normal' => ['name' => '普通批发商', 'discount_rate' => 0.00],
@@ -26,7 +38,7 @@ return [
             'diamond' => ['name' => '钻石批发商', 'discount_rate' => 0.20],
         ],
 
-        'default_grade' => 'normal',
+        'default_grade' => env('SHEARERLINE_DEFAULT_GRADE', 'normal'),
 
         'cost_types' => [
             'purchase' => '采购成本',
@@ -53,8 +65,8 @@ return [
     ],
 
     'shipping' => [
-        'default_template' => 'sf_standard',
-        'volumetric_divisor' => 6000,
+        'default_template' => env('SHEARERLINE_SHIPPING_TEMPLATE', 'sf_standard'),
+        'volumetric_divisor' => env('SHEARERLINE_VOLUMETRIC_DIVISOR', 6000),
         'weight_unit' => 'kg',
         'dimension_unit' => 'cm',
         'additional_weight_round' => 'ceil',
