@@ -297,6 +297,169 @@ class SettlementService
         $distributorShare = round($totalProfit * $distributorRatio, 2);
         $platformShare = round($totalProfit * $platformRatio, 2);
 
+        $fundFlowNodes = [
+            [
+                'id' => 'customer',
+                'name' => '客户',
+                'amount' => $totalAmount,
+                'type' => 'source',
+                'description' => '销售收款',
+            ],
+            [
+                'id' => 'platform',
+                'name' => '平台账户',
+                'amount' => $totalAmount,
+                'type' => 'transfer',
+                'description' => '资金归集',
+            ],
+            [
+                'id' => 'product_cost',
+                'name' => '商品成本',
+                'amount' => round($productCost, 2),
+                'type' => 'cost',
+                'description' => '供应商货款',
+            ],
+            [
+                'id' => 'platform_fee',
+                'name' => '平台费用',
+                'amount' => $platformFee,
+                'type' => 'cost',
+                'description' => '平台服务费预扣',
+            ],
+            [
+                'id' => 'other_cost',
+                'name' => '其他成本',
+                'amount' => $otherCost,
+                'type' => 'cost',
+                'description' => '其他杂费',
+            ],
+            [
+                'id' => 'profit',
+                'name' => '可分配利润',
+                'amount' => $totalProfit,
+                'type' => 'profit',
+                'description' => '利润总额',
+            ],
+            [
+                'id' => 'supplier',
+                'name' => '供应商',
+                'amount' => $supplierShare,
+                'type' => 'recipient',
+                'description' => '利润分成',
+            ],
+            [
+                'id' => 'distributor',
+                'name' => '分销商',
+                'amount' => $distributorShare,
+                'type' => 'recipient',
+                'description' => '利润分成',
+            ],
+            [
+                'id' => 'platform_income',
+                'name' => '平台收益',
+                'amount' => $platformShare,
+                'type' => 'recipient',
+                'description' => '利润分成',
+            ],
+        ];
+
+        $fundFlowEdges = [
+            ['from' => 'customer', 'to' => 'platform', 'amount' => $totalAmount, 'label' => '销售总额'],
+            ['from' => 'platform', 'to' => 'product_cost', 'amount' => round($productCost, 2), 'label' => '商品成本'],
+            ['from' => 'platform', 'to' => 'platform_fee', 'amount' => $platformFee, 'label' => '平台费用'],
+            ['from' => 'platform', 'to' => 'other_cost', 'amount' => $otherCost, 'label' => '其他成本'],
+            ['from' => 'platform', 'to' => 'profit', 'amount' => $totalProfit, 'label' => '剩余利润'],
+            ['from' => 'profit', 'to' => 'supplier', 'amount' => $supplierShare, 'label' => ($supplierRatio * 100) . '%'],
+            ['from' => 'profit', 'to' => 'distributor', 'amount' => $distributorShare, 'label' => ($distributorRatio * 100) . '%'],
+            ['from' => 'profit', 'to' => 'platform_income', 'amount' => $platformShare, 'label' => ($platformRatio * 100) . '%'],
+        ];
+
+        $fundFlowDescription = sprintf(
+            '资金流向：客户支付 ¥%s → 平台归集后，扣除商品成本 ¥%s、平台费用 ¥%s、其他成本 ¥%s，剩余利润 ¥%s 按比例分配：供应商 %s%% (¥%s)、分销商 %s%% (¥%s)、平台 %s%% (¥%s)。',
+            format_money($totalAmount),
+            format_money($productCost),
+            format_money($platformFee),
+            format_money($otherCost),
+            format_money($totalProfit),
+            $supplierRatio * 100,
+            format_money($supplierShare),
+            $distributorRatio * 100,
+            format_money($distributorShare),
+            $platformRatio * 100,
+            format_money($platformShare)
+        );
+
+        $withholdFormulas = [
+            [
+                'name' => '销售总额',
+                'formula' => '销售总额 = Σ(商品单价 × 数量)',
+                'value' => $totalAmount,
+                'calculation' => collect($calculatedItems)->map(function($item) {
+                    return "¥{$item['sale_price']} × {$item['quantity']}";
+                })->implode(' + '),
+            ],
+            [
+                'name' => '商品成本',
+                'formula' => '商品成本 = Σ(单位成本 × 数量)',
+                'value' => round($productCost, 2),
+                'calculation' => collect($calculatedItems)->map(function($item) {
+                    return "¥{$item['unit_cost']} × {$item['quantity']}";
+                })->implode(' + '),
+            ],
+            [
+                'name' => '预扣费用合计',
+                'formula' => '预扣费用 = 平台费用 + 其他成本',
+                'value' => round($platformFee + $otherCost, 2),
+                'calculation' => "¥{$platformFee} + ¥{$otherCost}",
+            ],
+            [
+                'name' => '总成本',
+                'formula' => '总成本 = 商品成本 + 平台费用 + 其他成本',
+                'value' => $totalCost,
+                'calculation' => "¥" . format_money($productCost) . " + ¥{$platformFee} + ¥{$otherCost}",
+            ],
+            [
+                'name' => '利润总额',
+                'formula' => '利润总额 = 销售总额 - 总成本',
+                'value' => $totalProfit,
+                'calculation' => "¥{$totalAmount} - ¥{$totalCost}",
+            ],
+            [
+                'name' => '利润率',
+                'formula' => '利润率 = 利润总额 ÷ 销售总额 × 100%',
+                'value' => $profitRate,
+                'calculation' => $totalAmount > 0 ? "¥{$totalProfit} ÷ ¥{$totalAmount} × 100%" : 'N/A',
+                'is_percent' => true,
+            ],
+            [
+                'name' => '供应商分成',
+                'formula' => '供应商分成 = 利润总额 × 供应商分成比例',
+                'value' => $supplierShare,
+                'calculation' => "¥{$totalProfit} × " . ($supplierRatio * 100) . "%",
+            ],
+            [
+                'name' => '分销商分成',
+                'formula' => '分销商分成 = 利润总额 × 分销商分成比例',
+                'value' => $distributorShare,
+                'calculation' => "¥{$totalProfit} × " . ($distributorRatio * 100) . "%",
+            ],
+            [
+                'name' => '平台分成',
+                'formula' => '平台分成 = 利润总额 × 平台分成比例',
+                'value' => $platformShare,
+                'calculation' => "¥{$totalProfit} × " . ($platformRatio * 100) . "%",
+            ],
+        ];
+
+        $withholdSummary = sprintf(
+            '本次结算共 %d 件商品，销售总额 ¥%s，扣除各项成本 ¥%s 后，实现利润 ¥%s，利润率 %s%%。',
+            $orderCount,
+            format_money($totalAmount),
+            format_money($totalCost),
+            format_money($totalProfit),
+            $totalAmount > 0 ? round($profitRate * 100, 2) : '0'
+        );
+
         return [
             'settlement_date' => $settlementDate,
             'items' => $calculatedItems,
@@ -318,6 +481,18 @@ class SettlementService
                 'supplier_share' => $supplierShare,
                 'distributor_share' => $distributorShare,
                 'platform_share' => $platformShare,
+            ],
+            'fund_flow' => [
+                'nodes' => $fundFlowNodes,
+                'edges' => $fundFlowEdges,
+                'description' => $fundFlowDescription,
+                'total_amount' => $totalAmount,
+                'total_cost' => $totalCost,
+                'total_profit' => $totalProfit,
+            ],
+            'withhold_formula' => [
+                'formulas' => $withholdFormulas,
+                'summary' => $withholdSummary,
             ],
         ];
     }

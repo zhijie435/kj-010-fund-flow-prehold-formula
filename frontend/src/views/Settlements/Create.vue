@@ -285,6 +285,132 @@
         </div>
       </el-col>
     </el-row>
+
+    <el-row :gutter="20" v-if="previewResult?.fund_flow">
+      <el-col :span="24">
+        <div class="page-card">
+          <h3 style="margin: 0 0 16px 0;">资金流向图</h3>
+          <div class="fund-flow-container">
+            <div class="fund-flow-chart">
+              <div class="fund-flow-node source">
+                <div class="node-icon"><el-icon><User /></el-icon></div>
+                <div class="node-name">客户</div>
+                <div class="node-amount">¥{{ formatMoney(previewResult.fund_flow.total_amount) }}</div>
+                <div class="node-desc">销售收款</div>
+              </div>
+              <div class="fund-flow-arrow">
+                <el-icon><ArrowRight /></el-icon>
+                <span class="arrow-label">销售总额</span>
+              </div>
+              <div class="fund-flow-node transfer">
+                <div class="node-icon"><el-icon><Wallet /></el-icon></div>
+                <div class="node-name">平台账户</div>
+                <div class="node-amount">¥{{ formatMoney(previewResult.fund_flow.total_amount) }}</div>
+                <div class="node-desc">资金归集</div>
+              </div>
+            </div>
+            <div class="fund-flow-split">
+              <div class="split-row">
+                <div class="split-item cost">
+                  <div class="split-icon"><el-icon><Goods /></el-icon></div>
+                  <div class="split-info">
+                    <div class="split-name">商品成本</div>
+                    <div class="split-amount">¥{{ formatMoney(previewResult.summary.product_cost) }}</div>
+                  </div>
+                  <div class="split-arrow"><el-icon><Bottom /></el-icon></div>
+                </div>
+                <div class="split-item cost">
+                  <div class="split-icon"><el-icon><Service /></el-icon></div>
+                  <div class="split-info">
+                    <div class="split-name">平台费用</div>
+                    <div class="split-amount">¥{{ formatMoney(previewResult.summary.platform_fee) }}</div>
+                  </div>
+                  <div class="split-arrow"><el-icon><Bottom /></el-icon></div>
+                </div>
+                <div class="split-item cost">
+                  <div class="split-icon"><el-icon><Menu /></el-icon></div>
+                  <div class="split-info">
+                    <div class="split-name">其他成本</div>
+                    <div class="split-amount">¥{{ formatMoney(previewResult.summary.other_cost) }}</div>
+                  </div>
+                  <div class="split-arrow"><el-icon><Bottom /></el-icon></div>
+                </div>
+              </div>
+            </div>
+            <div class="fund-flow-profit">
+              <div class="profit-node">
+                <div class="profit-icon"><el-icon><GoldMedal /></el-icon></div>
+                <div class="profit-name">可分配利润</div>
+                <div class="profit-amount">¥{{ formatMoney(previewResult.fund_flow.total_profit) }}</div>
+                <div class="profit-desc">利润总额</div>
+              </div>
+            </div>
+            <div class="fund-flow-share">
+              <div class="share-item supplier">
+                <div class="share-icon"><el-icon><OfficeBuilding /></el-icon></div>
+                <div class="share-info">
+                  <div class="share-name">供应商</div>
+                  <div class="share-ratio">{{ formatPercent(previewResult.shares.supplier_ratio) }}</div>
+                </div>
+                <div class="share-amount">¥{{ formatMoney(previewResult.shares.supplier_share) }}</div>
+              </div>
+              <div class="share-item distributor">
+                <div class="share-icon"><el-icon><UserFilled /></el-icon></div>
+                <div class="share-info">
+                  <div class="share-name">分销商</div>
+                  <div class="share-ratio">{{ formatPercent(previewResult.shares.distributor_ratio) }}</div>
+                </div>
+                <div class="share-amount">¥{{ formatMoney(previewResult.shares.distributor_share) }}</div>
+              </div>
+              <div class="share-item platform">
+                <div class="share-icon"><el-icon><Platform /></el-icon></div>
+                <div class="share-info">
+                  <div class="share-name">平台</div>
+                  <div class="share-ratio">{{ formatPercent(previewResult.shares.platform_ratio) }}</div>
+                </div>
+                <div class="share-amount">¥{{ formatMoney(previewResult.shares.platform_share) }}</div>
+              </div>
+            </div>
+            <div class="fund-flow-desc">
+              <el-icon style="vertical-align: -2px; margin-right: 4px;"><InfoFilled /></el-icon>
+              {{ previewResult.fund_flow.description }}
+            </div>
+          </div>
+        </div>
+
+        <div class="page-card" v-if="previewResult?.withhold_formula">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3 style="margin: 0;">预扣公式与计算明细</h3>
+          </div>
+          <el-alert
+            :title="previewResult.withhold_formula.summary"
+            type="info"
+            :closable="false"
+            style="margin-bottom: 16px;"
+          />
+          <el-table :data="previewResult.withhold_formula.formulas" border stripe>
+            <el-table-column prop="name" label="项目" width="140" />
+            <el-table-column prop="formula" label="计算公式" min-width="280">
+              <template #default="{ row }">
+                <code style="background: #f5f7fa; padding: 2px 6px; border-radius: 4px; font-size: 13px;">{{ row.formula }}</code>
+              </template>
+            </el-table-column>
+            <el-table-column label="计算过程" min-width="300">
+              <template #default="{ row }">
+                <span style="color: #606266; font-size: 13px;">{{ row.calculation }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="结果" width="140" align="right">
+              <template #default="{ row }">
+                <span style="font-weight: 600;">
+                  {{ row.is_percent ? formatPercent(row.value) : '¥' + formatMoney(row.value) }}
+                </span>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+      </el-col>
+    </el-row>
   </div>
 </template>
 
@@ -295,6 +421,11 @@ import { ElMessage } from 'element-plus'
 import { getAllProducts, calculateProductCost } from '@/api/product'
 import { calculateSettlement, createSettlement } from '@/api/settlement'
 import { formatMoney, formatPercent, SETTLEMENT_TYPES } from '@/utils/format'
+import {
+  View, Check, Plus, Delete, Calculator,
+  User, ArrowRight, Goods, Service, Menu,
+  Bottom, GoldMedal, OfficeBuilding, UserFilled, Platform, InfoFilled
+} from '@element-plus/icons-vue'
 
 const router = useRouter()
 
@@ -487,5 +618,266 @@ const goBack = () => router.back()
 .text-red {
   color: #F56C6C;
   font-weight: 500;
+}
+
+.fund-flow-container {
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8f4fd 100%);
+  border-radius: 12px;
+  padding: 24px;
+
+  .fund-flow-chart {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+
+    .fund-flow-node {
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px 24px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      min-width: 140px;
+      transition: transform 0.3s, box-shadow 0.3s;
+
+      &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      }
+
+      &.source {
+        border: 2px solid #67C23A;
+
+        .node-icon {
+          color: #67C23A;
+        }
+      }
+
+      &.transfer {
+        border: 2px solid #409EFF;
+
+        .node-icon {
+          color: #409EFF;
+        }
+      }
+
+      .node-icon {
+        font-size: 32px;
+        margin-bottom: 8px;
+      }
+
+      .node-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: #303133;
+        margin-bottom: 4px;
+      }
+
+      .node-amount {
+        font-size: 20px;
+        font-weight: 700;
+        color: #303133;
+        margin-bottom: 4px;
+      }
+
+      .node-desc {
+        font-size: 12px;
+        color: #909399;
+      }
+    }
+
+    .fund-flow-arrow {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #409EFF;
+      font-size: 24px;
+
+      .arrow-label {
+        font-size: 12px;
+        color: #606266;
+        margin-top: 4px;
+      }
+    }
+  }
+
+  .fund-flow-split {
+    margin-bottom: 20px;
+
+    .split-row {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+    }
+
+    .split-item {
+      background: #fff;
+      border-radius: 8px;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      min-width: 180px;
+
+      &.cost {
+        border-left: 4px solid #F56C6C;
+
+        .split-icon {
+          color: #F56C6C;
+        }
+      }
+
+      .split-icon {
+        font-size: 24px;
+      }
+
+      .split-info {
+        flex: 1;
+
+        .split-name {
+          font-size: 13px;
+          color: #606266;
+        }
+
+        .split-amount {
+          font-size: 16px;
+          font-weight: 600;
+          color: #303133;
+        }
+      }
+
+      .split-arrow {
+        color: #F56C6C;
+        font-size: 16px;
+      }
+    }
+  }
+
+  .fund-flow-profit {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+
+    .profit-node {
+      background: linear-gradient(135deg, #67C23A 0%, #85CE61 100%);
+      border-radius: 12px;
+      padding: 16px 40px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(103, 194, 58, 0.3);
+      color: #fff;
+
+      .profit-icon {
+        font-size: 32px;
+        margin-bottom: 8px;
+      }
+
+      .profit-name {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+
+      .profit-amount {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+
+      .profit-desc {
+        font-size: 12px;
+        opacity: 0.9;
+      }
+    }
+  }
+
+  .fund-flow-share {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 20px;
+
+    .share-item {
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      min-width: 200px;
+
+      &.supplier {
+        border-top: 4px solid #409EFF;
+
+        .share-icon {
+          color: #409EFF;
+        }
+
+        .share-amount {
+          color: #409EFF;
+        }
+      }
+
+      &.distributor {
+        border-top: 4px solid #67C23A;
+
+        .share-icon {
+          color: #67C23A;
+        }
+
+        .share-amount {
+          color: #67C23A;
+        }
+      }
+
+      &.platform {
+        border-top: 4px solid #E6A23C;
+
+        .share-icon {
+          color: #E6A23C;
+        }
+
+        .share-amount {
+          color: #E6A23C;
+        }
+      }
+
+      .share-icon {
+        font-size: 28px;
+      }
+
+      .share-info {
+        flex: 1;
+
+        .share-name {
+          font-size: 14px;
+          font-weight: 600;
+          color: #303133;
+        }
+
+        .share-ratio {
+          font-size: 12px;
+          color: #909399;
+        }
+      }
+
+      .share-amount {
+        font-size: 18px;
+        font-weight: 700;
+      }
+    }
+  }
+
+  .fund-flow-desc {
+    background: #fff;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #606266;
+    line-height: 1.8;
+    border-left: 4px solid #409EFF;
+  }
 }
 </style>
