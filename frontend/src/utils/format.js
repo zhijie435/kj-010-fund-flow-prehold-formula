@@ -8,6 +8,12 @@ export function formatPercent(value, decimals = 2) {
   return (num * 100).toFixed(decimals) + '%'
 }
 
+export function formatDiscountMultiplier(discountRate, decimals = 2) {
+  const num = parseFloat(discountRate || 0)
+  const multiplier = 1 - num
+  return '× ' + multiplier.toFixed(decimals)
+}
+
 export function formatDate(value, format = 'YYYY-MM-DD') {
   if (!value) return '-'
   const date = new Date(value)

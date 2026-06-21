@@ -219,13 +219,13 @@
                     <el-option
                       v-for="(info, key) in gradeOptions"
                       :key="key"
-                      :label="`${info.name} (${formatPercent(info.discount_rate)}折扣)`"
+                      :label="`${info.name} (${formatDiscountMultiplier(info.discount_rate)})`"
                       :value="key"
                     />
                   </el-select>
                 </el-form-item>
                 <el-form-item label="折扣率">
-                  <el-tag type="warning" size="large">{{ formatPercent(gradeDiscountRate) }}</el-tag>
+                  <el-tag type="warning" size="large">{{ gradeDiscountDisplay }}</el-tag>
                 </el-form-item>
               </el-form>
 
@@ -319,8 +319,8 @@
                 <el-descriptions-item label="供货价">
                   <span style="font-weight: 500;">¥{{ formatMoney(gradeSingleResult.supplier_price) }}</span>
                 </el-descriptions-item>
-                <el-descriptions-item label="等级折扣率">
-                  <el-tag type="warning" size="small">{{ formatPercent(gradeSingleResult.discount_rate) }}</el-tag>
+                <el-descriptions-item label="等级折扣">
+                  <el-tag type="warning" size="small">{{ formatDiscountMultiplier(gradeSingleResult.discount_rate) }}{{ gradeSingleResult.discount_rate === 0 ? '（无折扣）' : '' }}</el-tag>
                 </el-descriptions-item>
                 <el-descriptions-item label="单位成本">
                   <span style="font-weight: 600; color: #E6A23C;">¥{{ formatMoney(gradeSingleResult.unit_cost) }}</span>
@@ -342,7 +342,7 @@
             <div class="page-card" v-if="increasedItems.length > 0">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                 <h3 style="margin: 0;">增加商品成本明细</h3>
-                <el-tag type="warning">{{ gradeName }} - {{ formatPercent(gradeDiscountRate) }}折扣</el-tag>
+                <el-tag type="warning">{{ gradeName }} - {{ gradeDiscountDisplay }}</el-tag>
               </div>
 
               <el-table :data="increasedItems" size="small" border stripe>
@@ -432,7 +432,7 @@ import {
   calculateProductCostByGrade,
   calculateIncreasedCost
 } from '@/api/product'
-import { formatMoney, formatPercent } from '@/utils/format'
+import { formatMoney, formatPercent, formatDiscountMultiplier } from '@/utils/format'
 
 const activeTab = ref('cost-item')
 const calcDate = ref(new Date().toISOString().slice(0, 10))
@@ -461,8 +461,17 @@ const gradeDiscountRate = computed(() => {
   return gradeOptions.value[grade.value]?.discount_rate || 0
 })
 
+const gradeDiscountDisplay = computed(() => {
+  const rate = gradeDiscountRate.value
+  const multiplier = formatDiscountMultiplier(rate)
+  if (rate === 0) {
+    return multiplier + '（无折扣）'
+  }
+  return multiplier
+})
+
 const gradeName = computed(() => {
-  return gradeOptions.value[grade.value]?.name || '普通等级'
+  return gradeOptions.value[grade.value]?.name || '普通批发商'
 })
 
 const totalIncreasedCost = computed(() => {

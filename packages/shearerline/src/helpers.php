@@ -66,11 +66,11 @@ if (!function_exists('get_grade_discounts')) {
     function get_grade_discounts(): array
     {
         return config('shearerline.settlement.grade_discounts', [
-            'normal' => ['name' => '普通等级', 'discount_rate' => 0.00],
-            'silver' => ['name' => '白银等级', 'discount_rate' => 0.05],
-            'gold' => ['name' => '黄金等级', 'discount_rate' => 0.10],
-            'platinum' => ['name' => '铂金等级', 'discount_rate' => 0.15],
-            'diamond' => ['name' => '钻石等级', 'discount_rate' => 0.20],
+            'normal' => ['name' => '普通批发商', 'discount_rate' => 0.00],
+            'silver' => ['name' => '白银批发商', 'discount_rate' => 0.05],
+            'gold' => ['name' => '黄金批发商', 'discount_rate' => 0.10],
+            'platinum' => ['name' => '铂金批发商', 'discount_rate' => 0.15],
+            'diamond' => ['name' => '钻石批发商', 'discount_rate' => 0.20],
         ]);
     }
 }
