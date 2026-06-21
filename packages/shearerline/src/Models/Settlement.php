@@ -247,6 +247,13 @@ class Settlement extends Model
 
     public function getWithholdFormulaAttribute()
     {
+        if (!$this->relationLoaded('items')) {
+            return [
+                'formulas' => [],
+                'summary' => '',
+            ];
+        }
+
         $totalAmount = (float) $this->total_amount;
         $productCost = (float) $this->product_cost;
         $platformFee = (float) $this->platform_fee;
