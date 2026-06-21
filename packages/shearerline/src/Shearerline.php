@@ -199,6 +199,27 @@ class Shearerline implements ShearerlineInterface
         return get_cost_types();
     }
 
+    public function getGradeDiscounts(): array
+    {
+        return get_grade_discounts();
+    }
+
+    public function calculateProductCostByGrade(int $productId, ?string $grade = null): array
+    {
+        $product = Product::findOrFail($productId);
+        return $this->costService->calculateProductCostByGrade($product, $grade);
+    }
+
+    public function calculateMultipleProductsCostByGrade(array $productIds, ?string $grade = null): array
+    {
+        return $this->costService->calculateMultipleProductsCostByGrade($productIds, $grade);
+    }
+
+    public function calculateIncreasedProductCost(array $items, ?string $grade = null): array
+    {
+        return $this->costService->calculateIncreasedProductCost($items, $grade);
+    }
+
     public function getSettlementTypes(): array
     {
         return get_settlement_types();

@@ -23,6 +23,7 @@ class UpdateProductRequest extends FormRequest
             'category' => 'nullable|string|max:100',
             'unit' => 'nullable|string|max:50',
             'sale_price' => 'sometimes|numeric|min:0',
+            'supplier_price' => 'nullable|numeric|min:0',
             'weight' => 'nullable|numeric|min:0',
             'description' => 'nullable|string',
             'image_url' => 'nullable|string|max:500',

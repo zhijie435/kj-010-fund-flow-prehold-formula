@@ -63,6 +63,11 @@
             <span style="font-weight: 500; color: #F56C6C;">¥{{ formatMoney(row.sale_price) }}</span>
           </template>
         </el-table-column>
+        <el-table-column label="供货价" width="120" align="right">
+          <template #default="{ row }">
+            <span style="color: #E6A23C;">¥{{ formatMoney(row.supplier_price || 0) }}</span>
+          </template>
+        </el-table-column>
         <el-table-column label="成本" width="120" align="right">
           <template #default="{ row }">
             <span style="color: #909399;">¥{{ formatMoney(getTotalCost(row)) }}</span>
@@ -153,6 +158,13 @@
               <el-input-number v-model="formData.sale_price" :min="0" :precision="2" :step="1" style="width: 100%;" />
             </el-form-item>
           </el-col>
+          <el-col :span="12">
+            <el-form-item label="供货价">
+              <el-input-number v-model="formData.supplier_price" :min="0" :precision="2" :step="1" style="width: 100%;" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="16">
           <el-col :span="12">
             <el-form-item label="库存">
               <el-input-number v-model="formData.stock" :min="0" :step="1" style="width: 100%;" />
@@ -258,6 +270,7 @@ const formData = reactive({
   category: '',
   unit: '',
   sale_price: 0,
+  supplier_price: 0,
   stock: 0,
   status: 1,
   description: '',
@@ -330,6 +343,7 @@ const openCreateDialog = () => {
     category: '',
     unit: '',
     sale_price: 0,
+    supplier_price: 0,
     stock: 0,
     status: 1,
     description: '',
@@ -348,6 +362,7 @@ const openEditDialog = (row) => {
     category: row.category || '',
     unit: row.unit || '',
     sale_price: row.sale_price,
+    supplier_price: row.supplier_price || 0,
     stock: row.stock,
     status: row.status,
     description: row.description || '',

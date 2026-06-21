@@ -15,8 +15,12 @@ Route::group([
 
     Route::get('products/all', [ApiProductController::class, 'all'])->name('shearerline.api.products.all');
     Route::get('products/cost-types', [ApiProductController::class, 'costTypes'])->name('shearerline.api.products.costTypes');
+    Route::get('products/grade-discounts', [ApiProductController::class, 'gradeDiscounts'])->name('shearerline.api.products.gradeDiscounts');
     Route::get('products/{product}/calculate-cost', [ApiProductController::class, 'calculateCost'])->name('shearerline.api.products.calculateCost');
+    Route::get('products/{product}/calculate-cost-by-grade', [ApiProductController::class, 'calculateCostByGrade'])->name('shearerline.api.products.calculateCostByGrade');
     Route::post('products/batch-calculate-cost', [ApiProductController::class, 'batchCalculateCost'])->name('shearerline.api.products.batchCalculateCost');
+    Route::post('products/batch-calculate-cost-by-grade', [ApiProductController::class, 'batchCalculateCostByGrade'])->name('shearerline.api.products.batchCalculateCostByGrade');
+    Route::post('products/calculate-increased-cost', [ApiProductController::class, 'calculateIncreasedCost'])->name('shearerline.api.products.calculateIncreasedCost');
     Route::apiResource('products', ApiProductController::class, ['names' => 'shearerline.api.products']);
 
     Route::get('products/{product}/costs', [ApiProductCostController::class, 'index'])->name('shearerline.api.product-costs.index');

@@ -20,6 +20,7 @@ class Product extends Model
         'category',
         'unit',
         'sale_price',
+        'supplier_price',
         'weight',
         'description',
         'image_url',
@@ -34,6 +35,7 @@ class Product extends Model
     {
         return [
             'sale_price' => 'decimal:2',
+            'supplier_price' => 'decimal:2',
             'weight' => 'decimal:2',
             'stock' => 'integer',
             'warning_stock' => 'integer',

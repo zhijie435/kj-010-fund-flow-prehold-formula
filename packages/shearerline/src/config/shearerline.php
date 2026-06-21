@@ -18,6 +18,16 @@ return [
         'default_distributor_ratio' => 0.20,
         'default_platform_ratio' => 0.30,
 
+        'grade_discounts' => [
+            'normal' => ['name' => '普通等级', 'discount_rate' => 0.00],
+            'silver' => ['name' => '白银等级', 'discount_rate' => 0.05],
+            'gold' => ['name' => '黄金等级', 'discount_rate' => 0.10],
+            'platinum' => ['name' => '铂金等级', 'discount_rate' => 0.15],
+            'diamond' => ['name' => '钻石等级', 'discount_rate' => 0.20],
+        ],
+
+        'default_grade' => 'normal',
+
         'cost_types' => [
             'purchase' => '采购成本',
             'shipping' => '物流成本',

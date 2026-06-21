@@ -35,3 +35,19 @@ export function batchCalculateCost(data) {
 export function getCostTypes() {
   return request.get('/products/cost-types')
 }
+
+export function getGradeDiscounts() {
+  return request.get('/products/grade-discounts')
+}
+
+export function calculateProductCostByGrade(id, params) {
+  return request.get(`/products/${id}/calculate-cost-by-grade`, { params })
+}
+
+export function batchCalculateCostByGrade(data) {
+  return request.post('/products/batch-calculate-cost-by-grade', data)
+}
+
+export function calculateIncreasedCost(data) {
+  return request.post('/products/calculate-increased-cost', data)
+}

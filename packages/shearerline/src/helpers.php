@@ -61,3 +61,31 @@ if (!function_exists('get_settlement_statuses')) {
         ]);
     }
 }
+
+if (!function_exists('get_grade_discounts')) {
+    function get_grade_discounts(): array
+    {
+        return config('shearerline.settlement.grade_discounts', [
+            'normal' => ['name' => '普通等级', 'discount_rate' => 0.00],
+            'silver' => ['name' => '白银等级', 'discount_rate' => 0.05],
+            'gold' => ['name' => '黄金等级', 'discount_rate' => 0.10],
+            'platinum' => ['name' => '铂金等级', 'discount_rate' => 0.15],
+            'diamond' => ['name' => '钻石等级', 'discount_rate' => 0.20],
+        ]);
+    }
+}
+
+if (!function_exists('get_grade_discount_rate')) {
+    function get_grade_discount_rate(string $grade): float
+    {
+        $grades = get_grade_discounts();
+        return isset($grades[$grade]) ? (float) $grades[$grade]['discount_rate'] : 0.0;
+    }
+}
+
+if (!function_exists('get_default_grade')) {
+    function get_default_grade(): string
+    {
+        return config('shearerline.settlement.default_grade', 'normal');
+    }
+}

@@ -23,6 +23,9 @@
             <el-descriptions-item label="售价">
               <span style="color: #F56C6C; font-weight: 600;">¥{{ formatMoney(product.sale_price) }}</span>
             </el-descriptions-item>
+            <el-descriptions-item label="供货价">
+              <span style="color: #E6A23C; font-weight: 600;">¥{{ formatMoney(product.supplier_price || 0) }}</span>
+            </el-descriptions-item>
             <el-descriptions-item label="状态">
               <el-tag :type="product.status === 1 ? 'success' : 'info'" size="small">
                 {{ product.status === 1 ? '在售' : '下架' }}
