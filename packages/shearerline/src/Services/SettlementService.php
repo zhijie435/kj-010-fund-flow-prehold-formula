@@ -152,7 +152,8 @@ class SettlementService
                 $data['updated_by'] = Auth::id();
             }
 
-            $settlement->update($data);
+            $settlement->fill($data);
+            $settlement->save();
 
             return $settlement->fresh('items');
         });
@@ -167,6 +168,8 @@ class SettlementService
                 throw new \Shearerline\Exceptions\SettlementStateException('结算单当前状态不可结算');
             }
 
+            $settlement->recalculateTotals();
+
             $data = [
                 'status' => Settlement::STATUS_SETTLED,
                 'settled_at' => now(),
@@ -177,7 +180,8 @@ class SettlementService
                 $data['updated_by'] = Auth::id();
             }
 
-            $settlement->update($data);
+            $settlement->fill($data);
+            $settlement->save();
 
             return $settlement->fresh('items');
         });
