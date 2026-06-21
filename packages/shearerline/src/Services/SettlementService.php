@@ -34,8 +34,9 @@ class SettlementService
             if (!empty($data['items']) && is_array($data['items'])) {
                 $this->attachItems($settlement, $data['items']);
                 $settlement->refresh();
-                $settlement->recalculateTotals()->save();
             }
+
+            $settlement->recalculateTotals()->save();
 
             return $settlement->fresh('items');
         });

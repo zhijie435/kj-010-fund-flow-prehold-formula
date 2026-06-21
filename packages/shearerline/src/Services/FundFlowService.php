@@ -267,17 +267,21 @@ class FundFlowService
         $breakdown = [];
 
         foreach ($items as $item) {
-            if (!empty($item->cost_breakdown)) {
-                foreach ($item->cost_breakdown as $bd) {
-                    $type = $bd['cost_type'];
+            $bd = $item->cost_breakdown;
+            if (is_string($bd)) {
+                $bd = json_decode($bd, true);
+            }
+            if (!empty($bd) && is_array($bd)) {
+                foreach ($bd as $row) {
+                    $type = $row['cost_type'];
                     if (!isset($breakdown[$type])) {
                         $breakdown[$type] = [
                             'cost_type' => $type,
-                            'cost_type_name' => $bd['cost_type_name'],
+                            'cost_type_name' => $row['cost_type_name'],
                             'total' => 0,
                         ];
                     }
-                    $breakdown[$type]['total'] += $bd['total'] * $item->quantity;
+                    $breakdown[$type]['total'] += $row['total'] * $item->quantity;
                 }
             }
         }
