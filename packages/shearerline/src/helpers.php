@@ -89,3 +89,37 @@ if (!function_exists('get_default_grade')) {
         return config('shearerline.settlement.default_grade', 'normal');
     }
 }
+
+if (!function_exists('get_shipping_templates')) {
+    function get_shipping_templates(): array
+    {
+        return config('shearerline.shipping.templates', []);
+    }
+}
+
+if (!function_exists('get_default_shipping_template')) {
+    function get_default_shipping_template(): string
+    {
+        return config('shearerline.shipping.default_template', 'sf_standard');
+    }
+}
+
+if (!function_exists('get_shipping_template')) {
+    function get_shipping_template(?string $key = null): ?array
+    {
+        $templates = get_shipping_templates();
+
+        if ($key === null) {
+            $key = get_default_shipping_template();
+        }
+
+        return $templates[$key] ?? null;
+    }
+}
+
+if (!function_exists('get_default_volumetric_divisor')) {
+    function get_default_volumetric_divisor(): int
+    {
+        return (int) config('shearerline.shipping.volumetric_divisor', 6000);
+    }
+}

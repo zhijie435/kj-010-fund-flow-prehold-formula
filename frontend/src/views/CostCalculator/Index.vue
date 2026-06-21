@@ -417,6 +417,194 @@
           </el-col>
         </el-row>
       </el-tab-pane>
+
+      <el-tab-pane label="预估运费" name="shipping">
+        <el-row :gutter="20">
+          <el-col :span="10">
+            <div class="page-card">
+              <h3 style="margin: 0 0 16px 0;">运费预估参数</h3>
+
+              <el-form label-width="100px">
+                <el-form-item label="选择商品">
+                  <el-select
+                    v-model="shipProductId"
+                    placeholder="搜索选择商品"
+                    filterable
+                    remote
+                    :remote-method="searchProducts"
+                    :loading="productLoading"
+                    style="width: 100%;"
+                    @change="onShipProductChange"
+                  >
+                    <el-option
+                      v-for="p in productOptions"
+                      :key="p.id"
+                      :label="`${p.name} (${p.sku})`"
+                      :value="p.id"
+                    />
+                  </el-select>
+                </el-form-item>
+                <el-form-item label="物流商模板">
+                  <el-select v-model="shipTemplate" style="width: 100%;" @change="onTemplateChange">
+                    <el-option
+                      v-for="(tpl, key) in shippingTemplates"
+                      :key="key"
+                      :label="tpl.name"
+                      :value="key"
+                    />
+                  </el-select>
+                </el-form-item>
+                <el-form-item label="目的地">
+                  <el-select v-model="shipDestination" style="width: 100%;" :disabled="!currentTemplateZones.length">
+                    <el-option
+                      v-for="zone in currentTemplateZones"
+                      :key="zone.key"
+                      :label="zone.name"
+                      :value="zone.key"
+                    />
+                  </el-select>
+                </el-form-item>
+                <el-form-item label="数量">
+                  <el-input-number v-model="shipQuantity" :min="1" :step="1" style="width: 100%;" />
+                </el-form-item>
+
+                <el-divider>重量与尺寸（可覆盖）</el-divider>
+
+                <el-form-item label="重量(kg)">
+                  <el-input-number v-model="shipWeight" :min="0" :precision="2" :step="0.1" style="width: 100%;" />
+                </el-form-item>
+                <el-row :gutter="16">
+                  <el-col :span="8">
+                    <el-form-item label="长(cm)" label-width="70px">
+                      <el-input-number v-model="shipLength" :min="0" :precision="2" :step="1" style="width: 100%;" />
+                    </el-form-item>
+                  </el-col>
+                  <el-col :span="8">
+                    <el-form-item label="宽(cm)" label-width="70px">
+                      <el-input-number v-model="shipWidth" :min="0" :precision="2" :step="1" style="width: 100%;" />
+                    </el-form-item>
+                  </el-col>
+                  <el-col :span="8">
+                    <el-form-item label="高(cm)" label-width="70px">
+                      <el-input-number v-model="shipHeight" :min="0" :precision="2" :step="1" style="width: 100%;" />
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+
+                <el-form-item>
+                  <el-button type="primary" @click="calculateShipping" :loading="shipLoading" :disabled="!shipProductId || !shipDestination">
+                    <el-icon><Calculator /></el-icon>预估运费
+                  </el-button>
+                  <el-button @click="compareShippingFee" :loading="shipCompareLoading" :disabled="!shipProductId || !shipDestination">
+                    <el-icon><Switch /></el-icon>对比物流商
+                  </el-button>
+                  <el-button @click="resetShipping">
+                    <el-icon><Refresh /></el-icon>重置
+                  </el-button>
+                </el-form-item>
+              </el-form>
+
+              <div style="padding: 16px; background: #f0f9eb; border-radius: 6px; border: 1px solid #e1f3d8;">
+                <div style="font-weight: 500; color: #67c23a; margin-bottom: 8px;">
+                  <el-icon><InfoFilled /></el-icon> 计算规则
+                </div>
+                <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: #606266; line-height: 1.8;">
+                  <li>计费重量 = max(实际重量, 体积重量)</li>
+                  <li>体积重量 = 长×宽×高×数量 ÷ 体积系数</li>
+                  <li>运费 = 首重运费 + ceil(计费重量 - 首重) × 续重单价</li>
+                  <li>未超首重时按首重运费收取</li>
+                </ul>
+              </div>
+            </div>
+          </el-col>
+
+          <el-col :span="14">
+            <div class="page-card" v-if="shipResult">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="margin: 0;">预估运费结果</h3>
+                <el-tag type="success">{{ shipResult.template_name }} · {{ shipResult.destination_name }}</el-tag>
+              </div>
+
+              <el-descriptions :column="2" border size="small" style="margin-bottom: 20px;">
+                <el-descriptions-item label="商品">{{ shipResult.product_name }}</el-descriptions-item>
+                <el-descriptions-item label="SKU">{{ shipResult.product_sku }}</el-descriptions-item>
+                <el-descriptions-item label="数量">{{ shipResult.quantity }}</el-descriptions-item>
+                <el-descriptions-item label="计费依据">
+                  <el-tag size="small" :type="shipResult.weight_basis === 'volumetric' ? 'warning' : shipResult.weight_basis === 'actual' ? '' : 'info'">
+                    {{ weightBasisLabel(shipResult.weight_basis) }}
+                  </el-tag>
+                </el-descriptions-item>
+                <el-descriptions-item label="实际重量">{{ formatMoney(shipResult.actual_weight) }} kg</el-descriptions-item>
+                <el-descriptions-item label="体积重量">{{ formatMoney(shipResult.volumetric_weight) }} kg</el-descriptions-item>
+                <el-descriptions-item label="体积系数">{{ shipResult.volumetric_divisor }}</el-descriptions-item>
+                <el-descriptions-item label="尺寸">
+                  {{ formatMoney(shipResult.length) }} × {{ formatMoney(shipResult.width) }} × {{ formatMoney(shipResult.height) }} cm
+                </el-descriptions-item>
+                <el-descriptions-item label="首重">{{ formatMoney(shipResult.first_weight) }} kg</el-descriptions-item>
+                <el-descriptions-item label="续重">{{ shipResult.additional_units }} kg</el-descriptions-item>
+                <el-descriptions-item label="首重运费">¥{{ formatMoney(shipResult.first_weight_fee) }}</el-descriptions-item>
+                <el-descriptions-item label="续重单价">¥{{ formatMoney(shipResult.additional_weight_fee) }}/kg</el-descriptions-item>
+                <el-descriptions-item label="计费重量">
+                  <span style="font-weight: 600; color: #409EFF;">{{ formatMoney(shipResult.chargeable_weight) }} kg</span>
+                </el-descriptions-item>
+                <el-descriptions-item label="预估运费">
+                  <span style="font-size: 20px; font-weight: 700; color: #F56C6C;">¥{{ formatMoney(shipResult.shipping_fee) }}</span>
+                </el-descriptions-item>
+              </el-descriptions>
+
+              <el-alert :title="shipResult.calculation_detail" type="info" :closable="false" show-icon style="margin-bottom: 16px;" />
+
+              <div style="padding: 12px 16px; background: #f5f7fa; border-radius: 6px; font-size: 13px; color: #909399;">
+                <el-icon><InfoFilled /></el-icon> {{ shipResult.formula }}
+              </div>
+            </div>
+
+            <div class="page-card" v-if="shipCompareResult">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="margin: 0;">物流商运费对比</h3>
+                <el-tag type="warning">目的地：{{ shipCompareResult.destination }}</el-tag>
+              </div>
+
+              <el-table :data="shipCompareResult.estimates" size="small" border stripe>
+                <el-table-column label="物流商" min-width="140">
+                  <template #default="{ row }">
+                    <span style="font-weight: 500;">{{ row.template_name }}</span>
+                    <el-tag v-if="shipCompareResult.cheapest && row.template === shipCompareResult.cheapest.template" type="success" size="small" style="margin-left: 8px;">最低</el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column label="体积系数" width="100" align="center">
+                  <template #default="{ row }">{{ row.volumetric_divisor }}</template>
+                </el-table-column>
+                <el-table-column label="计费重量" width="110" align="right">
+                  <template #default="{ row }">{{ formatMoney(row.chargeable_weight) }} kg</template>
+                </el-table-column>
+                <el-table-column label="首重运费" width="100" align="right">
+                  <template #default="{ row }">¥{{ formatMoney(row.first_weight_fee) }}</template>
+                </el-table-column>
+                <el-table-column label="续重单价" width="100" align="right">
+                  <template #default="{ row }">¥{{ formatMoney(row.additional_weight_fee) }}</template>
+                </el-table-column>
+                <el-table-column label="预估运费" width="120" align="right">
+                  <template #default="{ row }">
+                    <span style="font-weight: 600; color: #F56C6C;">¥{{ formatMoney(row.shipping_fee) }}</span>
+                  </template>
+                </el-table-column>
+              </el-table>
+
+              <div style="margin-top: 16px; padding: 12px 16px; background: #fdf6ec; border-radius: 6px; border: 1px solid #faecd8;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="color: #E6A23C; font-weight: 500;">最优物流商</span>
+                  <span style="font-weight: 700; color: #E6A23C;">
+                    {{ shipCompareResult.cheapest?.template_name }} · ¥{{ formatMoney(shipCompareResult.cheapest?.shipping_fee || 0) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <el-empty v-if="!shipResult && !shipCompareResult" description="请选择商品、物流商与目的地进行运费预估" />
+          </el-col>
+        </el-row>
+      </el-tab-pane>
     </el-tabs>
   </div>
 </template>
@@ -430,7 +618,9 @@ import {
   batchCalculateCost,
   getGradeDiscounts,
   calculateProductCostByGrade,
-  calculateIncreasedCost
+  getShippingTemplates,
+  estimateShipping,
+  compareShipping
 } from '@/api/product'
 import { formatMoney, formatPercent, formatDiscountMultiplier } from '@/utils/format'
 
@@ -457,6 +647,20 @@ const newIncreasedItem = reactive({
   quantity: 1
 })
 
+const shippingTemplates = ref({})
+const shipProductId = ref(null)
+const shipTemplate = ref('')
+const shipDestination = ref('')
+const shipQuantity = ref(1)
+const shipWeight = ref(0)
+const shipLength = ref(0)
+const shipWidth = ref(0)
+const shipHeight = ref(0)
+const shipLoading = ref(false)
+const shipCompareLoading = ref(false)
+const shipResult = ref(null)
+const shipCompareResult = ref(null)
+
 const gradeDiscountRate = computed(() => {
   return gradeOptions.value[grade.value]?.discount_rate || 0
 })
@@ -472,6 +676,15 @@ const gradeDiscountDisplay = computed(() => {
 
 const gradeName = computed(() => {
   return gradeOptions.value[grade.value]?.name || '普通批发商'
+})
+
+const currentTemplateZones = computed(() => {
+  const tpl = shippingTemplates.value[shipTemplate.value]
+  if (!tpl || !tpl.zones) return []
+  return Object.entries(tpl.zones).map(([key, zone]) => ({
+    key,
+    name: zone.name
+  }))
 })
 
 const totalIncreasedCost = computed(() => {
@@ -614,9 +827,102 @@ const calculateIncreasedItemsCost = () => {
   })
 }
 
+const loadShippingTemplates = async () => {
+  try {
+    const data = await getShippingTemplates()
+    shippingTemplates.value = data || {}
+    const keys = Object.keys(shippingTemplates.value)
+    if (keys.length && !shipTemplate.value) {
+      shipTemplate.value = keys[0]
+    }
+  } catch (e) {}
+}
+
+const onShipProductChange = () => {
+  const product = productMap.value[shipProductId.value]
+  if (product) {
+    shipWeight.value = parseFloat(product.weight) || 0
+    shipLength.value = parseFloat(product.length) || 0
+    shipWidth.value = parseFloat(product.width) || 0
+    shipHeight.value = parseFloat(product.height) || 0
+  }
+  shipResult.value = null
+  shipCompareResult.value = null
+}
+
+const onTemplateChange = () => {
+  shipDestination.value = ''
+  shipResult.value = null
+  shipCompareResult.value = null
+}
+
+const buildShippingParams = () => {
+  const params = {
+    template: shipTemplate.value,
+    destination: shipDestination.value,
+    quantity: shipQuantity.value
+  }
+  if (shipWeight.value) params.weight = shipWeight.value
+  if (shipLength.value) params.length = shipLength.value
+  if (shipWidth.value) params.width = shipWidth.value
+  if (shipHeight.value) params.height = shipHeight.value
+  return params
+}
+
+const calculateShipping = async () => {
+  if (!shipProductId.value || !shipDestination.value) return
+  shipLoading.value = true
+  shipCompareResult.value = null
+  try {
+    shipResult.value = await estimateShipping(shipProductId.value, buildShippingParams())
+    ElMessage.success('预估运费计算成功')
+  } catch (e) {
+    shipResult.value = null
+  } finally {
+    shipLoading.value = false
+  }
+}
+
+const compareShippingFee = async () => {
+  if (!shipProductId.value || !shipDestination.value) return
+  shipCompareLoading.value = true
+  shipResult.value = null
+  try {
+    const params = { destination: shipDestination.value, quantity: shipQuantity.value }
+    if (shipWeight.value) params.weight = shipWeight.value
+    if (shipLength.value) params.length = shipLength.value
+    if (shipWidth.value) params.width = shipWidth.value
+    if (shipHeight.value) params.height = shipHeight.value
+    shipCompareResult.value = await compareShipping(shipProductId.value, params)
+    ElMessage.success('物流商对比完成')
+  } catch (e) {
+    shipCompareResult.value = null
+  } finally {
+    shipCompareLoading.value = false
+  }
+}
+
+const resetShipping = () => {
+  shipProductId.value = null
+  shipDestination.value = ''
+  shipQuantity.value = 1
+  shipWeight.value = 0
+  shipLength.value = 0
+  shipWidth.value = 0
+  shipHeight.value = 0
+  shipResult.value = null
+  shipCompareResult.value = null
+}
+
+const weightBasisLabel = (basis) => {
+  const map = { actual: '按实际重量', volumetric: '按体积重量', none: '无重量信息' }
+  return map[basis] || basis
+}
+
 onMounted(async () => {
   await searchProducts('')
   await loadGradeDiscounts()
+  await loadShippingTemplates()
 })
 </script>
 

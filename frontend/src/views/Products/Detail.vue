@@ -31,6 +31,15 @@
                 {{ product.status === 1 ? '在售' : '下架' }}
               </el-tag>
             </el-descriptions-item>
+            <el-descriptions-item label="重量">
+              {{ product.weight ? formatMoney(product.weight) + ' kg' : '-' }}
+            </el-descriptions-item>
+            <el-descriptions-item label="尺寸(长×宽×高)">
+              <span v-if="product.length || product.width || product.height">
+                {{ formatMoney(product.length) }} × {{ formatMoney(product.width) }} × {{ formatMoney(product.height) }} cm
+              </span>
+              <span v-else>-</span>
+            </el-descriptions-item>
           </el-descriptions>
         </div>
 

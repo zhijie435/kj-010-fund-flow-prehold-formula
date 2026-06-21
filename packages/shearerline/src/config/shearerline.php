@@ -51,4 +51,143 @@ return [
             'cancelled' => '已取消',
         ],
     ],
+
+    'shipping' => [
+        'default_template' => 'sf_standard',
+        'volumetric_divisor' => 6000,
+        'weight_unit' => 'kg',
+        'dimension_unit' => 'cm',
+        'additional_weight_round' => 'ceil',
+
+        'templates' => [
+            'sf_standard' => [
+                'name' => '顺丰标快',
+                'volumetric_divisor' => 6000,
+                'first_weight' => 1.0,
+                'zones' => [
+                    'local' => [
+                        'name' => '同城',
+                        'first_weight_fee' => 12.00,
+                        'additional_weight_fee' => 2.00,
+                    ],
+                    'province' => [
+                        'name' => '省内',
+                        'first_weight_fee' => 14.00,
+                        'additional_weight_fee' => 3.00,
+                    ],
+                    'region_1' => [
+                        'name' => '一区(江浙沪皖)',
+                        'first_weight_fee' => 18.00,
+                        'additional_weight_fee' => 5.00,
+                    ],
+                    'region_2' => [
+                        'name' => '二区(京津冀鲁豫等)',
+                        'first_weight_fee' => 21.00,
+                        'additional_weight_fee' => 7.00,
+                    ],
+                    'region_3' => [
+                        'name' => '三区(东北西北西南等)',
+                        'first_weight_fee' => 26.00,
+                        'additional_weight_fee' => 10.00,
+                    ],
+                ],
+            ],
+            'sf_economy' => [
+                'name' => '顺丰特惠',
+                'volumetric_divisor' => 8000,
+                'first_weight' => 1.0,
+                'zones' => [
+                    'local' => [
+                        'name' => '同城',
+                        'first_weight_fee' => 8.00,
+                        'additional_weight_fee' => 1.50,
+                    ],
+                    'province' => [
+                        'name' => '省内',
+                        'first_weight_fee' => 10.00,
+                        'additional_weight_fee' => 2.00,
+                    ],
+                    'region_1' => [
+                        'name' => '一区(江浙沪皖)',
+                        'first_weight_fee' => 13.00,
+                        'additional_weight_fee' => 3.50,
+                    ],
+                    'region_2' => [
+                        'name' => '二区(京津冀鲁豫等)',
+                        'first_weight_fee' => 16.00,
+                        'additional_weight_fee' => 5.00,
+                    ],
+                    'region_3' => [
+                        'name' => '三区(东北西北西南等)',
+                        'first_weight_fee' => 20.00,
+                        'additional_weight_fee' => 7.00,
+                    ],
+                ],
+            ],
+            'zt_express' => [
+                'name' => '中通快递',
+                'volumetric_divisor' => 6000,
+                'first_weight' => 1.0,
+                'zones' => [
+                    'local' => [
+                        'name' => '同城',
+                        'first_weight_fee' => 6.00,
+                        'additional_weight_fee' => 1.00,
+                    ],
+                    'province' => [
+                        'name' => '省内',
+                        'first_weight_fee' => 8.00,
+                        'additional_weight_fee' => 2.00,
+                    ],
+                    'region_1' => [
+                        'name' => '一区(江浙沪皖)',
+                        'first_weight_fee' => 10.00,
+                        'additional_weight_fee' => 3.00,
+                    ],
+                    'region_2' => [
+                        'name' => '二区(京津冀鲁豫等)',
+                        'first_weight_fee' => 12.00,
+                        'additional_weight_fee' => 5.00,
+                    ],
+                    'region_3' => [
+                        'name' => '三区(东北西北西南等)',
+                        'first_weight_fee' => 15.00,
+                        'additional_weight_fee' => 8.00,
+                    ],
+                ],
+            ],
+            'yt_express' => [
+                'name' => '圆通速递',
+                'volumetric_divisor' => 6000,
+                'first_weight' => 1.0,
+                'zones' => [
+                    'local' => [
+                        'name' => '同城',
+                        'first_weight_fee' => 6.00,
+                        'additional_weight_fee' => 1.00,
+                    ],
+                    'province' => [
+                        'name' => '省内',
+                        'first_weight_fee' => 7.00,
+                        'additional_weight_fee' => 2.00,
+                    ],
+                    'region_1' => [
+                        'name' => '一区(江浙沪皖)',
+                        'first_weight_fee' => 9.00,
+                        'additional_weight_fee' => 3.00,
+                    ],
+                    'region_2' => [
+                        'name' => '二区(京津冀鲁豫等)',
+                        'first_weight_fee' => 11.00,
+                        'additional_weight_fee' => 5.00,
+                    ],
+                    'region_3' => [
+                        'name' => '三区(东北西北西南等)',
+                        'first_weight_fee' => 14.00,
+                        'additional_weight_fee' => 8.00,
+                    ],
+                ],
+            ],
+        ],
+    ],
 ];

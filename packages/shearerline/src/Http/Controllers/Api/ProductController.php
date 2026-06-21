@@ -32,7 +32,7 @@ class ProductController extends Controller
     public function all()
     {
         $products = Product::active()
-            ->select('id', 'name', 'sku', 'sale_price', 'supplier_price')
+            ->select('id', 'name', 'sku', 'sale_price', 'supplier_price', 'weight', 'length', 'width', 'height')
             ->orderBy('name')
             ->get();
 
@@ -141,5 +141,43 @@ class ProductController extends Controller
         );
 
         return $this->success($result, '增加商品成本计算成功');
+    }
+
+    public function shippingTemplates()
+    {
+        return $this->success($this->shearerline->getShippingTemplates());
+    }
+
+    public function estimateShipping(Request $request, Product $product)
+    {
+        $validated = $request->validate([
+            'template' => 'nullable|string',
+            'destination' => 'required|string',
+            'quantity' => 'nullable|integer|min:1',
+            'weight' => 'nullable|numeric|min:0',
+            'length' => 'nullable|numeric|min:0',
+            'width' => 'nullable|numeric|min:0',
+            'height' => 'nullable|numeric|min:0',
+        ]);
+
+        $result = $this->shearerline->estimateShippingFee($product->id, $validated);
+
+        return $this->success($result, '预估运费计算成功');
+    }
+
+    public function compareShipping(Request $request, Product $product)
+    {
+        $validated = $request->validate([
+            'destination' => 'required|string',
+            'quantity' => 'nullable|integer|min:1',
+            'weight' => 'nullable|numeric|min:0',
+            'length' => 'nullable|numeric|min:0',
+            'width' => 'nullable|numeric|min:0',
+            'height' => 'nullable|numeric|min:0',
+        ]);
+
+        $result = $this->shearerline->compareShippingFee($product->id, $validated);
+
+        return $this->success($result, '物流商运费对比成功');
     }
 }

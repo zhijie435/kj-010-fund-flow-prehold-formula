@@ -230,6 +230,23 @@ class Shearerline implements ShearerlineInterface
         return get_settlement_statuses();
     }
 
+    public function getShippingTemplates(): array
+    {
+        return get_shipping_templates();
+    }
+
+    public function estimateShippingFee(int $productId, array $params = []): array
+    {
+        $product = Product::findOrFail($productId);
+        return $this->costService->estimateShippingFee($product, $params);
+    }
+
+    public function compareShippingFee(int $productId, array $params = []): array
+    {
+        $product = Product::findOrFail($productId);
+        return $this->costService->compareShippingFee($product, $params);
+    }
+
     public function getDashboardStatistics(): array
     {
         $totalProducts = Product::count();

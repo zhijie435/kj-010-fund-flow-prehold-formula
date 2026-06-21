@@ -51,3 +51,15 @@ export function batchCalculateCostByGrade(data) {
 export function calculateIncreasedCost(data) {
   return request.post('/products/calculate-increased-cost', data)
 }
+
+export function getShippingTemplates() {
+  return request.get('/products/shipping-templates')
+}
+
+export function estimateShipping(id, params) {
+  return request.get(`/products/${id}/estimate-shipping`, { params })
+}
+
+export function compareShipping(id, params) {
+  return request.get(`/products/${id}/compare-shipping`, { params })
+}

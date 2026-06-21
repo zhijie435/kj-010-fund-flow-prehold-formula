@@ -170,6 +170,28 @@
               <el-input-number v-model="formData.stock" :min="0" :step="1" style="width: 100%;" />
             </el-form-item>
           </el-col>
+          <el-col :span="12">
+            <el-form-item label="重量(kg)">
+              <el-input-number v-model="formData.weight" :min="0" :precision="2" :step="0.1" style="width: 100%;" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="16">
+          <el-col :span="8">
+            <el-form-item label="长(cm)">
+              <el-input-number v-model="formData.length" :min="0" :precision="2" :step="1" style="width: 100%;" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="宽(cm)">
+              <el-input-number v-model="formData.width" :min="0" :precision="2" :step="1" style="width: 100%;" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="高(cm)">
+              <el-input-number v-model="formData.height" :min="0" :precision="2" :step="1" style="width: 100%;" />
+            </el-form-item>
+          </el-col>
         </el-row>
         <el-form-item label="状态">
           <el-radio-group v-model="formData.status">
@@ -271,6 +293,10 @@ const formData = reactive({
   unit: '',
   sale_price: 0,
   supplier_price: 0,
+  weight: 0,
+  length: 0,
+  width: 0,
+  height: 0,
   stock: 0,
   status: 1,
   description: '',
@@ -344,6 +370,10 @@ const openCreateDialog = () => {
     unit: '',
     sale_price: 0,
     supplier_price: 0,
+    weight: 0,
+    length: 0,
+    width: 0,
+    height: 0,
     stock: 0,
     status: 1,
     description: '',
@@ -363,6 +393,10 @@ const openEditDialog = (row) => {
     unit: row.unit || '',
     sale_price: row.sale_price,
     supplier_price: row.supplier_price || 0,
+    weight: row.weight || 0,
+    length: row.length || 0,
+    width: row.width || 0,
+    height: row.height || 0,
     stock: row.stock,
     status: row.status,
     description: row.description || '',

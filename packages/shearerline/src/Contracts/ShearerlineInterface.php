@@ -41,4 +41,10 @@ interface ShearerlineInterface
     public function cancelSettlement(int $id);
 
     public function calculateSettlement(array $items, array $ratios = []): array;
+
+    public function getShippingTemplates(): array;
+
+    public function estimateShippingFee(int $productId, array $params = []): array;
+
+    public function compareShippingFee(int $productId, array $params = []): array;
 }
