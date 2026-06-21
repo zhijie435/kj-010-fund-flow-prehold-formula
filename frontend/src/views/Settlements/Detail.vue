@@ -60,7 +60,25 @@
 
         <div class="page-card">
           <h3 style="margin: 0 0 16px 0;">商品明细</h3>
-          <el-table :data="settlement.items || []" border stripe>
+          <el-table :data="settlement.items || []" border stripe row-key="id">
+            <el-table-column type="expand" width="50">
+              <template #default="{ row }">
+                <div v-if="row.cost_breakdown && row.cost_breakdown.length" style="padding: 12px 20px; background: #fafafa;">
+                  <div style="font-weight: 500; margin-bottom: 8px; color: #606266;">成本构成明细</div>
+                  <el-row :gutter="20">
+                    <el-col :span="8" v-for="bd in row.cost_breakdown" :key="bd.cost_type">
+                      <div style="display: flex; justify-content: space-between; padding: 4px 0;">
+                        <span style="color: #909399;">{{ bd.cost_type_name }}</span>
+                        <span style="font-weight: 500;">¥{{ formatMoney(bd.total * row.quantity) }}</span>
+                      </div>
+                    </el-col>
+                  </el-row>
+                </div>
+                <div v-else style="padding: 12px 20px; color: #909399;">
+                  暂无成本构成明细
+                </div>
+              </template>
+            </el-table-column>
             <el-table-column label="商品信息" min-width="200">
               <template #default="{ row }">
                 <div>
@@ -100,6 +118,9 @@
               </template>
             </el-table-column>
           </el-table>
+          <div style="margin-top: 8px; font-size: 12px; color: #909399;">
+            <el-icon style="vertical-align: -2px;"><InfoFilled /></el-icon> 点击左侧箭头可展开查看商品成本构成明细
+          </div>
         </div>
       </el-col>
 
@@ -121,6 +142,14 @@
               <span>商品成本</span>
               <span>¥{{ formatMoney(settlement.product_cost) }}</span>
             </div>
+
+            <div v-if="settlement.product_cost_breakdown && settlement.product_cost_breakdown.length" style="margin: 8px 0 8px 12px; padding-left: 12px; border-left: 2px solid #E4E7ED;">
+              <div v-for="bd in settlement.product_cost_breakdown" :key="bd.cost_type" class="finance-row" style="font-size: 13px;">
+                <span style="color: #909399;">{{ bd.cost_type_name }}</span>
+                <span style="color: #606266;">¥{{ formatMoney(bd.total) }}</span>
+              </div>
+            </div>
+
             <div class="finance-row">
               <span>平台费用</span>
               <span>¥{{ formatMoney(settlement.platform_fee) }}</span>
@@ -226,6 +255,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   getSettlement, confirmSettlement, settleSettlement, cancelSettlement
 } from '@/api/settlement'
+import { Check, Wallet, Close, InfoFilled } from '@element-plus/icons-vue'
 import {
   formatMoney, formatPercent, formatDate,
   getSettlementTypeInfo, getSettlementStatusInfo

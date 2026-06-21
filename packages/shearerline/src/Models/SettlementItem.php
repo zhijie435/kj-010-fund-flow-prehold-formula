@@ -23,6 +23,7 @@ class SettlementItem extends Model
         'total_sales',
         'unit_cost',
         'total_cost',
+        'cost_breakdown',
         'profit',
     ];
 
@@ -34,6 +35,7 @@ class SettlementItem extends Model
             'total_sales' => 'decimal:2',
             'unit_cost' => 'decimal:2',
             'total_cost' => 'decimal:2',
+            'cost_breakdown' => 'array',
             'profit' => 'decimal:2',
         ];
     }

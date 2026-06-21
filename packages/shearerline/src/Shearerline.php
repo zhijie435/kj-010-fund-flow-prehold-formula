@@ -118,6 +118,11 @@ class Shearerline implements ShearerlineInterface
         return $this->costService->calculateProductCost($product, $date);
     }
 
+    public function calculateProductCostForSettlement(int $productId, ?string $date = null): array
+    {
+        return $this->costService->calculateProductCostForSettlement($productId, $date);
+    }
+
     public function calculateMultipleProductsCost(array $productIds, ?string $date = null): array
     {
         return $this->costService->calculateMultipleProductsCost($productIds, $date);
@@ -153,7 +158,9 @@ class Shearerline implements ShearerlineInterface
 
     public function getSettlement(int $id)
     {
-        return Settlement::with(['items'])->findOrFail($id);
+        $settlement = Settlement::with(['items'])->findOrFail($id);
+        $settlement->recalculateTotals();
+        return $settlement;
     }
 
     public function createSettlement(array $data)

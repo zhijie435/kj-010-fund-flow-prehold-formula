@@ -236,6 +236,13 @@
               <span>商品成本</span>
               <span>¥{{ formatMoney(previewResult?.summary?.product_cost || liveSummary?.product_cost) }}</span>
             </div>
+
+            <div v-if="previewResult?.summary?.product_cost_breakdown && previewResult.summary.product_cost_breakdown.length" style="margin: 4px 0 4px 12px; padding-left: 12px; border-left: 2px solid #E4E7ED;">
+              <div v-for="bd in previewResult.summary.product_cost_breakdown" :key="bd.cost_type" class="summary-row" style="font-size: 13px;">
+                <span style="color: #909399;">{{ bd.cost_type_name }}</span>
+                <span style="color: #606266;">¥{{ formatMoney(bd.total) }}</span>
+              </div>
+            </div>
             <div class="summary-row">
               <span>平台费用</span>
               <span>¥{{ formatMoney(previewResult?.summary?.platform_fee || formData.platform_fee) }}</span>

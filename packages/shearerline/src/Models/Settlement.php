@@ -48,6 +48,10 @@ class Settlement extends Model
         'settled_at',
     ];
 
+    protected $appends = [
+        'product_cost_breakdown',
+    ];
+
     protected function casts(): array
     {
         return [
@@ -85,6 +89,36 @@ class Settlement extends Model
     {
         $statuses = get_settlement_statuses();
         return $statuses[$this->status] ?? $this->status;
+    }
+
+    public function getProductCostBreakdownAttribute()
+    {
+        if (!$this->relationLoaded('items')) {
+            return [];
+        }
+
+        $breakdown = [];
+        foreach ($this->items as $item) {
+            if (!empty($item->cost_breakdown)) {
+                foreach ($item->cost_breakdown as $bd) {
+                    $type = $bd['cost_type'];
+                    if (!isset($breakdown[$type])) {
+                        $breakdown[$type] = [
+                            'cost_type' => $type,
+                            'cost_type_name' => $bd['cost_type_name'],
+                            'total' => 0,
+                        ];
+                    }
+                    $breakdown[$type]['total'] += $bd['total'] * $item->quantity;
+                }
+            }
+        }
+
+        foreach ($breakdown as &$bd) {
+            $bd['total'] = round($bd['total'], 2);
+        }
+
+        return array_values($breakdown);
     }
 
     public function scopeOfType($query, $type)

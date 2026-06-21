@@ -41,8 +41,8 @@ class CostCalculationService
                 'unit_cost' => (float) $cost->unit_cost,
                 'quantity' => (int) $cost->quantity,
                 'total_cost' => $costTotal,
-                'effective_date' => $cost->effective_date?->toDateString(),
-                'expiry_date' => $cost->expiry_date?->toDateString(),
+                'effective_date' => $cost->effective_date ? \Illuminate\Support\Carbon::parse($cost->effective_date)->toDateString() : null,
+                'expiry_date' => $cost->expiry_date ? \Illuminate\Support\Carbon::parse($cost->expiry_date)->toDateString() : null,
             ];
         }
 
@@ -120,5 +120,16 @@ class CostCalculationService
         $product = Product::findOrFail($productId);
         $result = $this->calculateProductCost($product, $date);
         return $result['total_cost'];
+    }
+
+    public function calculateProductCostForSettlement(int $productId, ?string $date = null): array
+    {
+        $product = Product::findOrFail($productId);
+        $result = $this->calculateProductCost($product, $date);
+        return [
+            'unit_cost' => $result['total_cost'],
+            'cost_breakdown' => $result['breakdown'],
+            'cost_item_count' => $result['cost_item_count'],
+        ];
     }
 }

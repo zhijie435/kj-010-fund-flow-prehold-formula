@@ -104,9 +104,15 @@ class SettlementService
 
             $quantity = (int) ($itemData['quantity'] ?? 1);
             $salePrice = (float) ($itemData['sale_price'] ?? $product->sale_price);
-            $unitCost = isset($itemData['unit_cost'])
-                ? (float) $itemData['unit_cost']
-                : $this->costService->calculateUnitCostForSettlement($product->id, $settlement->settlement_date);
+            $costBreakdown = null;
+
+            if (isset($itemData['unit_cost'])) {
+                $unitCost = (float) $itemData['unit_cost'];
+            } else {
+                $costInfo = $this->costService->calculateProductCostForSettlement($product->id, $settlement->settlement_date);
+                $unitCost = $costInfo['unit_cost'];
+                $costBreakdown = $costInfo['cost_breakdown'];
+            }
 
             $settlement->items()->create([
                 'product_id' => $product->id,
@@ -117,6 +123,7 @@ class SettlementService
                 'total_sales' => round($salePrice * $quantity, 2),
                 'unit_cost' => $unitCost,
                 'total_cost' => round($unitCost * $quantity, 2),
+                'cost_breakdown' => $costBreakdown,
                 'profit' => round(($salePrice - $unitCost) * $quantity, 2),
             ]);
         }
@@ -212,6 +219,7 @@ class SettlementService
         $orderCount = 0;
         $totalAmount = 0;
         $productCost = 0;
+        $productCostBreakdown = [];
 
         foreach ($items as $itemData) {
             if (empty($itemData['product_id'])) {
@@ -225,9 +233,15 @@ class SettlementService
 
             $quantity = (int) ($itemData['quantity'] ?? 1);
             $salePrice = (float) ($itemData['sale_price'] ?? $product->sale_price);
-            $unitCost = isset($itemData['unit_cost'])
-                ? (float) $itemData['unit_cost']
-                : $this->costService->calculateUnitCostForSettlement($product->id, $settlementDate);
+            $costBreakdown = null;
+
+            if (isset($itemData['unit_cost'])) {
+                $unitCost = (float) $itemData['unit_cost'];
+            } else {
+                $costInfo = $this->costService->calculateProductCostForSettlement($product->id, $settlementDate);
+                $unitCost = $costInfo['unit_cost'];
+                $costBreakdown = $costInfo['cost_breakdown'];
+            }
 
             $totalSales = round($salePrice * $quantity, 2);
             $totalCost = round($unitCost * $quantity, 2);
@@ -242,6 +256,7 @@ class SettlementService
                 'total_sales' => $totalSales,
                 'unit_cost' => $unitCost,
                 'total_cost' => $totalCost,
+                'cost_breakdown' => $costBreakdown,
                 'profit' => $profit,
                 'profit_rate' => $totalSales > 0 ? round($profit / $totalSales, 4) : 0,
             ];
@@ -249,7 +264,26 @@ class SettlementService
             $orderCount++;
             $totalAmount += $totalSales;
             $productCost += $totalCost;
+
+            if ($costBreakdown) {
+                foreach ($costBreakdown as $bd) {
+                    $type = $bd['cost_type'];
+                    if (!isset($productCostBreakdown[$type])) {
+                        $productCostBreakdown[$type] = [
+                            'cost_type' => $type,
+                            'cost_type_name' => $bd['cost_type_name'],
+                            'total' => 0,
+                        ];
+                    }
+                    $productCostBreakdown[$type]['total'] += $bd['total'] * $quantity;
+                }
+            }
         }
+
+        foreach ($productCostBreakdown as &$bd) {
+            $bd['total'] = round($bd['total'], 2);
+        }
+        $productCostBreakdown = array_values($productCostBreakdown);
 
         $totalCost = round($productCost + $platformFee + $otherCost, 2);
         $totalProfit = round($totalAmount - $totalCost, 2);
@@ -266,6 +300,7 @@ class SettlementService
                 'order_count' => $orderCount,
                 'total_amount' => $totalAmount,
                 'product_cost' => round($productCost, 2),
+                'product_cost_breakdown' => $productCostBreakdown,
                 'platform_fee' => $platformFee,
                 'other_cost' => $otherCost,
                 'total_cost' => $totalCost,

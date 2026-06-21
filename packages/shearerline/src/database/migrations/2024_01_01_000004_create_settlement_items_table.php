@@ -19,6 +19,7 @@ return new class extends Migration
             $table->decimal('total_sales', 14, 2)->default(0)->comment('销售金额 = 单价 × 数量');
             $table->decimal('unit_cost', 12, 2)->default(0)->comment('单位成本(结算时快照)');
             $table->decimal('total_cost', 14, 2)->default(0)->comment('总成本 = 单位成本 × 数量');
+            $table->json('cost_breakdown')->nullable()->comment('成本构成明细(JSON)');
             $table->decimal('profit', 14, 2)->default(0)->comment('利润 = 销售金额 - 总成本');
 
             $table->foreign('settlement_id')
